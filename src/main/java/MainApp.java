@@ -265,6 +265,7 @@ class PremierePage extends JFrame {
         layeredPane.add(scrollPane, JLayeredPane.DEFAULT_LAYER);
         layeredPane.add(boutonPanel, JLayeredPane.PALETTE_LAYER);
         layeredPane.add(positionField, JLayeredPane.PALETTE_LAYER);
+        //allo
 
         frame.setContentPane(layeredPane);
         frame.setSize(1000, 800);
