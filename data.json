@@ -1,0 +1,31 @@
+[ {
+  "nom" : "William",
+  "translationX" : 134,
+  "translationY" : 154,
+  "Zoom" : 1.2000000000000002
+}, {
+  "nom" : "Felix",
+  "translationX" : 133,
+  "translationY" : 150,
+  "zoom" : 1.4000000000000004
+}, {
+  "nom" : "Alex",
+  "translationX" : -272,
+  "translationY" : 177,
+  "zoom" : 2.100000000000001
+}, {
+  "nom" : "allo",
+  "translationX" : 152,
+  "translationY" : 81,
+  "zoom" : 1.4000000000000004
+}, {
+  "nom" : "Xavier",
+  "translationX" : 158,
+  "translationY" : 234,
+  "zoom" : 1.2000000000000002
+}, {
+  "nom" : "pia",
+  "translationX" : 0,
+  "translationY" : 0,
+  "zoom" : 1.0
+} ]
