@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-
+import java.util.Stack; // en haut du fichier
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -39,6 +39,7 @@ class ImageViewer2 extends JPanel {
         }
 
         addMouseWheelListener(e -> {
+            sauvegarderEtat(); // ← AJOUT
             if (e.getPreciseWheelRotation() < 0)
                 zoom = Math.min(zoom + zoomStep, maxZoom);
             else
@@ -58,6 +59,7 @@ class ImageViewer2 extends JPanel {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
+                sauvegarderEtat(); // ← AJOUT
                 int dx = e.getX() - lastDragX;
                 int dy = e.getY() - lastDragY;
                 translateX += dx;
@@ -68,7 +70,9 @@ class ImageViewer2 extends JPanel {
                 repaint();
             }
         });
+
     }
+
 
     private void updatePositionField() {
         if (positionField != null) {
@@ -90,10 +94,39 @@ class ImageViewer2 extends JPanel {
         }
     }
 
-    public void zoomIn() { zoom = Math.min(zoom + zoomStep, maxZoom); updatePositionField(); repaint(); }
-    public void zoomOut() { zoom = Math.max(zoom - zoomStep, minZoom); updatePositionField(); repaint(); }
-    public void resetView() { zoom = 1.0; translateX = 0; translateY = 0; updatePositionField(); repaint(); }
+    public void zoomIn() {
+        sauvegarderEtat();
+        zoom = Math.min(zoom + zoomStep, maxZoom);
+        updatePositionField(); repaint(); }
+    public void zoomOut() { sauvegarderEtat();
+        zoom = Math.max(zoom - zoomStep, minZoom);
+        updatePositionField(); repaint(); }
+    public void resetView() { sauvegarderEtat();
+        zoom = 1.0;
+        translateX = 0;
+        translateY = 0;
+        updatePositionField(); repaint(); }
 
+    private Stack<ViewState> historique = new Stack<>();
+
+    private void sauvegarderEtat() {
+        historique.push(new ViewState(translateX, translateY, zoom));
+        // Limite facultative pour éviter que la pile ne grossisse indéfiniment
+        if (historique.size() > 100) historique.removeFirst();
+    }
+
+    public void annulerDerniereAction() {
+        if (!historique.isEmpty()) {
+            ViewState etat = historique.pop();
+            translateX = etat.x;
+            translateY = etat.y;
+            zoom = etat.zoom;
+            updatePositionField();
+            repaint();
+        } else {
+            JOptionPane.showMessageDialog(this, "Aucune action à annuler !");
+        }
+    }
     private void ouvrirFenetreSecondaire() {
         JDialog fenetreSecondaire = new JDialog((Frame) null, "Saisie du nom", true);
         fenetreSecondaire.setSize(300, 120);
@@ -166,7 +199,15 @@ class ImageViewer2 extends JPanel {
         return new Dimension(image.getWidth(), image.getHeight());
     }
 }
-
+class ViewState {
+    int x, y;
+    double zoom;
+    ViewState(int x, int y, double zoom) {
+        this.x = x;
+        this.y = y;
+        this.zoom = zoom;
+    }
+}
 // ----------------- PREMIÈRE PAGE -----------------
 class PremierePage extends JFrame {
 
@@ -239,6 +280,9 @@ class PremierePage extends JFrame {
         JButton zoomMoins = new JButton("-");
         JButton reset = new JButton("⟳");
         JButton enregistrer = new JButton("enregistrer");
+        JButton annuler = new JButton("↩ Annuler");
+        annuler.setPreferredSize(new Dimension(100, 30));
+
 
         Dimension size = new Dimension(50, 30);
         zoomPlus.setPreferredSize(size);
@@ -249,17 +293,19 @@ class PremierePage extends JFrame {
         zoomMoins.addActionListener(e -> viewer.zoomOut());
         reset.addActionListener(e -> viewer.resetView());
         enregistrer.addActionListener(e -> viewer.ajoutinfo());
+        annuler.addActionListener(e -> viewer.annulerDerniereAction());
 
         boutonPanel.add(zoomPlus);
         boutonPanel.add(zoomMoins);
         boutonPanel.add(reset);
         boutonPanel.add(enregistrer);
+        boutonPanel.add(annuler);
 
         JLayeredPane layeredPane = new JLayeredPane();
         JScrollPane scrollPane = new JScrollPane(viewer);
         scrollPane.setBounds(0, 0, 1000, 800);
 
-        boutonPanel.setBounds(20, 20, 300, 50);
+        boutonPanel.setBounds(20, 20, 450, 50);
         positionField.setBounds(20, 80, 220, 30);
 
         layeredPane.add(scrollPane, JLayeredPane.DEFAULT_LAYER);
