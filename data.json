@@ -33,4 +33,14 @@
   "translationX" : 0,
   "translationY" : 0,
   "zoom" : 1.0
+}, {
+  "nom" : "Vue principale",
+  "translationX" : 0,
+  "translationY" : 0,
+  "zoom" : 0.8264462809917359
+}, {
+  "nom" : "William",
+  "translationX" : 134,
+  "translationY" : 154,
+  "zoom" : 1.5972000000000006
 } ]
