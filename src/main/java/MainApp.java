@@ -14,6 +14,7 @@ import javax.swing.SwingUtilities;
 
 import clipboard.ClipboardMediator;
 import clipboard.CopyBoth;
+import clipboard.CopyTranslationXOnly;
 import command.CommandBus;
 import controller.CopyPasteController;
 import controller.LoadController;
@@ -92,7 +93,9 @@ public class MainApp {
         JButton btnUndo = new JButton("Undo");
         JButton btnRedo = new JButton("Redo");
         JButton btnCopy = new JButton("Copy");
+        JButton btnCopyX = new JButton("Copy X");
         JButton btnPaste = new JButton("Paste");
+        JButton btnPasteX = new JButton("Paste X");
         JButton btnSave = new JButton("Save");
 
         btnPlus.addActionListener(e -> zoomCtrl.handleZoomIn());
@@ -100,7 +103,15 @@ public class MainApp {
         btnUndo.addActionListener(e -> undoCtrl.handleUndo());
         btnRedo.addActionListener(e -> undoCtrl.handleRedo());
         btnCopy.addActionListener(e -> copyPasteCtrl.handleCopy());
+        btnCopyX.addActionListener(e -> {
+            copyPasteCtrl.setStrategy(new CopyTranslationXOnly());
+            copyPasteCtrl.handleCopy();
+        });
         btnPaste.addActionListener(e -> copyPasteCtrl.handlePaste());
+        btnPasteX.addActionListener(e -> {
+            copyPasteCtrl.setStrategy(new CopyTranslationXOnly());
+            copyPasteCtrl.handlePaste();
+        });
         btnSave.addActionListener(e -> saveCtrl.handleSave());
 
         controls.add(btnPlus);
@@ -108,7 +119,9 @@ public class MainApp {
         controls.add(btnUndo);
         controls.add(btnRedo);
         controls.add(btnCopy);
+        controls.add(btnCopyX);
         controls.add(btnPaste);
+        controls.add(btnPasteX);
         controls.add(btnSave);
 
         // Charger les perspectives depuis data.json

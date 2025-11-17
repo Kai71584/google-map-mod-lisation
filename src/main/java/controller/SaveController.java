@@ -1,11 +1,11 @@
 package controller;
 
+import javax.swing.JOptionPane;
+
 import command.CommandBus;
 import model.Perspective;
 import persistence.PersistenceManager;
 import view.AbstractImageView;
-
-import javax.swing.JOptionPane;
 
 public class SaveController extends AbstractController {
 
