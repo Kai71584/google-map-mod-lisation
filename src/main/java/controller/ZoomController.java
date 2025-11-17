@@ -25,5 +25,8 @@ public class ZoomController extends AbstractController {
         Perspective p = view.getActivePerspective();
         if (p == null) return;
         bus.execute(new ZoomCommand(p, factor));
+
+
+        
     }
 }

@@ -1,12 +1,13 @@
 package view;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
+import javax.swing.JPanel;
+
 import core.Observer;
 import model.ImageModel;
 import model.Perspective;
-
-import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
 public abstract class AbstractImageView extends JPanel implements Observer {
 

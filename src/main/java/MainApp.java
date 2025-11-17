@@ -1,3 +1,17 @@
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.io.IOException;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import clipboard.ClipboardMediator;
 import clipboard.CopyBoth;
 import command.CommandBus;
@@ -17,11 +31,6 @@ import view.CoordinatesView;
 import view.ImageView;
 import view.ViewComposite;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.util.List;
-
 public class MainApp {
 
     public static void main(String[] args) {
@@ -38,7 +47,7 @@ public class MainApp {
 
     private void start() throws IOException {
         // ⚠️ À adapter à ton chemin d'image
-        String imagePath = "C:\\GithubRepo\\google-map-mod-lisation\\w2.jpg";
+        String imagePath = "C:\\Users\\salut\\Pictures\\Screenshots\\Capture d’écran 2025-11-14 131349.png";
         String jsonPath = "data.json";
 
         ImageSource source = new FileImageSource(imagePath);
@@ -64,6 +73,7 @@ public class MainApp {
 
         // Contrôleurs
         ZoomController zoomCtrl = new ZoomController(imageView, bus);
+        imageView.setZoomController(zoomCtrl); // Connecte le ZoomController à ImageView pour la roulette
         new PanController(imageView, bus); // s'accroche aux events souris
         UndoRedoController undoCtrl = new UndoRedoController(imageView, bus);
         CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard);
