@@ -61,7 +61,7 @@ public class MainApp {
         // Vues
         ImageView imageView = new ImageView(model, pMain);
         CoordinatesView coordsView = new CoordinatesView(model, pMain);
-        coordsView.setPreferredSize(new Dimension(260, 70));
+        coordsView.setPreferredSize(new Dimension(300, 100));
 
         ViewComposite composite = new ViewComposite(model, pMain, new BorderLayout());
         composite.addView(imageView, BorderLayout.CENTER);
@@ -146,7 +146,7 @@ public class MainApp {
         frame.add(controls, BorderLayout.NORTH);
         frame.add(composite, BorderLayout.CENTER);
 
-        frame.setSize(1000, 800);
+        frame.setSize(1200, 800);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
