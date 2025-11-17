@@ -1,7 +1,6 @@
 package controller;
 
 import clipboard.ClipboardMediator;
-import clipboard.CopyBoth;
 import clipboard.CopyStrategy;
 import command.CommandBus;
 import command.PasteCommand;
@@ -11,30 +10,41 @@ import view.AbstractImageView;
 public class CopyPasteController extends AbstractController {
 
     private final ClipboardMediator clipboard;
-    private CopyStrategy strategy = new CopyBoth(); // par défaut : copie tout
 
     public CopyPasteController(AbstractImageView view,
                                CommandBus bus,
                                ClipboardMediator clipboard) {
         super(view, bus);
         this.clipboard = clipboard;
+        // Stratégie par défaut gérée par le médiateur
     }
 
+    /**
+     * Change la stratégie de copie/collage via le médiateur
+     */
     public void setStrategy(CopyStrategy strategy) {
-        this.strategy = strategy;
+        clipboard.setStrategy(strategy);
     }
 
+    /**
+     * Demande de copie : délègue au médiateur
+     */
     public void handleCopy() {
         Perspective p = view.getActivePerspective();
         if (p != null) {
-            clipboard.storeFrom(p);
+            // Le médiateur orchestre : il prend les données de la perspective
+            clipboard.mediateCopy(p);
         }
     }
 
+    /**
+     * Demande de collage : délègue au médiateur
+     */
     public void handlePaste() {
         Perspective p = view.getActivePerspective();
         if (p != null) {
-            bus.execute(new PasteCommand(p, clipboard, strategy));
+            // Le médiateur orchestre : il applique la stratégie
+            bus.execute(new PasteCommand(p, clipboard, clipboard.getCurrentStrategy()));
         }
     }
 }
