@@ -25,6 +25,7 @@ import controller.ZoomController;
 import model.FileImageSource;
 import model.ImageModel;
 import model.ImageSource;
+import model.MementoCaretaker;
 import model.Perspective;
 import persistence.JsonPersistenceManager;
 import persistence.PersistenceManager;
@@ -70,14 +71,15 @@ public class MainApp {
         // Infrastructure
         CommandBus bus = new CommandBus();
         ClipboardMediator clipboard = new ClipboardMediator();
+        MementoCaretaker caretaker = new MementoCaretaker(); // Crée le Caretaker
         PersistenceManager persistence = new JsonPersistenceManager(jsonPath);
 
         // Contrôleurs
-        ZoomController zoomCtrl = new ZoomController(imageView, bus);
+        ZoomController zoomCtrl = new ZoomController(imageView, bus, caretaker);
         imageView.setZoomController(zoomCtrl); // Connecte le ZoomController à ImageView pour la roulette
-        new PanController(imageView, bus); // s'accroche aux events souris
+        new PanController(imageView, bus, caretaker); // s'accroche aux events souris
         UndoRedoController undoCtrl = new UndoRedoController(imageView, bus);
-        CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard);
+        CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard, caretaker);
         copyPasteCtrl.setStrategy(new CopyBoth());
         SaveController saveCtrl = new SaveController(imageView, bus, persistence);
         LoadController loadCtrl = new LoadController(imageView, bus, persistence, model);

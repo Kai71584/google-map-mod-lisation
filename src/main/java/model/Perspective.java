@@ -1,8 +1,8 @@
 package model;
 
-import core.AbstractSubject;
-
 import java.awt.Point;
+
+import core.AbstractSubject;
 
 public class Perspective extends AbstractSubject {
 
@@ -19,8 +19,8 @@ public class Perspective extends AbstractSubject {
     }
 
     public void restore(PerspectiveMemento memento) {
-        this.scale = memento.scale();
-        this.translation = new Point(memento.translation());
+        this.scale = memento.getScale();
+        this.translation = new Point(memento.getTranslation());
         notifyObservers();
     }
 
