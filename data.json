@@ -43,4 +43,14 @@
   "translationX" : 134,
   "translationY" : 154,
   "zoom" : 1.5972000000000006
+}, {
+  "nom" : "Vue principale",
+  "translationX" : 98,
+  "translationY" : 68,
+  "zoom" : 1.3310000000000004
+}, {
+  "nom" : "avion net",
+  "translationX" : 83,
+  "translationY" : 62,
+  "zoom" : 1.0
 } ]
