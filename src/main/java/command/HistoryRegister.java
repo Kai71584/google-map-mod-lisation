@@ -7,45 +7,38 @@ import java.util.Map;
 
 import model.Perspective;
 
-public class CommandHistory {
+public class HistoryRegister {
 
-    private static final CommandHistory INSTANCE = new CommandHistory();
-    private static final HistoryRegister register = HistoryRegister.getInstance();
+    private static final HistoryRegister INSTANCE = new HistoryRegister();
 
     private final Map<Perspective, Deque<Command>> undoStacks = new HashMap<>();
     private final Map<Perspective, Deque<Command>> redoStacks = new HashMap<>();
-    private static final Map<Perspective, Deque<Command>> registerStacks = new HashMap<>();
 
-    private CommandHistory() { }
+    private HistoryRegister() { }
 
-    public static CommandHistory getInstance() {
+    public static HistoryRegister getInstance() {
         return INSTANCE;
     }
 
     public void push(Command cmd) {
         undoStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
         Deque<Command> redo = redoStacks.get(cmd.target());
         if (redo != null) redo.clear();
     }
 
-    public void undoLast(Perspective target) {
+    /*public void undoLast(Perspective target) {
         Deque<Command> stack = undoStacks.get(target);
         if (stack == null || stack.isEmpty()) return;
         Command cmd = stack.pop();
         cmd.undo();
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
-        
         redoStacks.computeIfAbsent(target, p -> new ArrayDeque<>()).push(cmd);
-    }
+    }*/
 
-    public void redoLast(Perspective target) {
+    /*public void redoLast(Perspective target) {
         Deque<Command> stack = redoStacks.get(target);
         if (stack == null || stack.isEmpty()) return;
         Command cmd = stack.pop();
         cmd.execute();
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
-        
         undoStacks.computeIfAbsent(target, p -> new ArrayDeque<>()).push(cmd);
-    }
+    }*/
 }
