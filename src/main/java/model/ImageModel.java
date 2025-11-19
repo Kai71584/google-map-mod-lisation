@@ -3,7 +3,9 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageModel {
+import core.AbstractSubject;
+
+public class ImageModel extends AbstractSubject {
 
     private final ImageSource source;
     private final List<Perspective> perspectives = new ArrayList<>();
@@ -18,6 +20,7 @@ public class ImageModel {
 
     public void addPerspective(Perspective p) {
         perspectives.add(p);
+        notifyObservers();
     }
 
     public List<Perspective> getPerspectives() {
