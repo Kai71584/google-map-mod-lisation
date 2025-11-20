@@ -10,12 +10,11 @@ import model.Perspective;
 public class CommandHistory {
 
     private static final CommandHistory INSTANCE = new CommandHistory();
-    private static final HistoryRegister register = HistoryRegister.getInstance();
+
 
     private final Map<Perspective, Deque<Command>> undoStacks = new HashMap<>();
     private final Map<Perspective, Deque<Command>> redoStacks = new HashMap<>();
-    private static final Map<Perspective, Deque<Command>> registerStacks = new HashMap<>();
-
+    
     private CommandHistory() { }
 
     public static CommandHistory getInstance() {
@@ -24,7 +23,6 @@ public class CommandHistory {
 
     public void push(Command cmd) {
         undoStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
         Deque<Command> redo = redoStacks.get(cmd.target());
         if (redo != null) redo.clear();
     }
@@ -34,7 +32,7 @@ public class CommandHistory {
         if (stack == null || stack.isEmpty()) return;
         Command cmd = stack.pop();
         cmd.undo();
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
+       
         
         redoStacks.computeIfAbsent(target, p -> new ArrayDeque<>()).push(cmd);
     }
@@ -44,7 +42,7 @@ public class CommandHistory {
         if (stack == null || stack.isEmpty()) return;
         Command cmd = stack.pop();
         cmd.execute();
-        registerStacks.computeIfAbsent(cmd.target(), p -> new ArrayDeque<>()).push(cmd);
+      
         
         undoStacks.computeIfAbsent(target, p -> new ArrayDeque<>()).push(cmd);
     }
