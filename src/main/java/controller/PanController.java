@@ -5,18 +5,15 @@ import java.awt.event.MouseEvent;
 
 import command.CommandBus;
 import command.TranslateCommand;
-import model.MementoCaretaker;
 import model.Perspective;
 import view.AbstractImageView;
 
 public class PanController extends AbstractController {
 
     private int lastX, lastY;
-    private final MementoCaretaker caretaker;
 
-    public PanController(AbstractImageView view, CommandBus bus, MementoCaretaker caretaker) {
+    public PanController(AbstractImageView view, CommandBus bus) {
         super(view, bus);
-        this.caretaker = caretaker;
         attachListeners();
     }
 
@@ -38,7 +35,7 @@ public class PanController extends AbstractController {
                 lastY = e.getY();
                 Perspective p = view.getActivePerspective();
                 if (p != null) {
-                    bus.execute(new TranslateCommand(p, dx, dy, caretaker));
+                    bus.execute(new TranslateCommand(p, dx, dy));
                 }
             }
         });

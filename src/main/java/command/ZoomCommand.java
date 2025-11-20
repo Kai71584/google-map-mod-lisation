@@ -1,32 +1,27 @@
 package command;
 
-import model.MementoCaretaker;
 import model.Perspective;
-import model.PerspectiveMemento;
 
 /**
- * Commande Zoom utilisant le pattern Memento pour l'undo/redo.
- * Sauvegarde l'état avant modification via le Caretaker.
+ * Commande Zoom : sauvegarde un snapshot de l'état avant modification
+ * pour permettre l'undo/redo.
  */
 public class ZoomCommand implements Command {
 
     private final Perspective target;
     private final double factor;
-    private final MementoCaretaker caretaker;
-    private PerspectiveMemento stateBefore;
+    private Perspective.Snapshot stateBefore;
 
-    public ZoomCommand(Perspective target, double factor, MementoCaretaker caretaker) {
+    public ZoomCommand(Perspective target, double factor) {
         this.target = target;
         this.factor = factor;
-        this.caretaker = caretaker;
     }
 
     @Override
     public void execute() {
         // Sauvegarde l'état AVANT la modification
-        stateBefore = target.createMemento();
-        caretaker.saveMemento(stateBefore);
-        
+        stateBefore = target.createSnapshot();
+
         // Effectue l'action
         double newScale = target.getScale() * factor;
         target.setScale(newScale);
@@ -44,4 +39,3 @@ public class ZoomCommand implements Command {
         return target;
     }
 }
-

@@ -4,22 +4,18 @@ import clipboard.ClipboardMediator;
 import clipboard.CopyStrategy;
 import command.CommandBus;
 import command.PasteCommand;
-import model.MementoCaretaker;
 import model.Perspective;
 import view.AbstractImageView;
 
 public class CopyPasteController extends AbstractController {
 
     private final ClipboardMediator clipboard;
-    private final MementoCaretaker caretaker;
 
     public CopyPasteController(AbstractImageView view,
-                               CommandBus bus,
-                               ClipboardMediator clipboard,
-                               MementoCaretaker caretaker) {
+            CommandBus bus,
+            ClipboardMediator clipboard) {
         super(view, bus);
         this.clipboard = clipboard;
-        this.caretaker = caretaker;
         // Stratégie par défaut gérée par le médiateur
     }
 
@@ -48,8 +44,7 @@ public class CopyPasteController extends AbstractController {
         Perspective p = view.getActivePerspective();
         if (p != null) {
             // Le médiateur orchestre : il applique la stratégie
-            bus.execute(new PasteCommand(p, clipboard, clipboard.getCurrentStrategy(), caretaker));
+            bus.execute(new PasteCommand(p, clipboard, clipboard.getCurrentStrategy()));
         }
     }
 }
-

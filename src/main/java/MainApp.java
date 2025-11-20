@@ -25,7 +25,6 @@ import controller.ZoomController;
 import model.FileImageSource;
 import model.ImageModel;
 import model.ImageSource;
-import model.MementoCaretaker;
 import model.Perspective;
 import persistence.JsonPersistenceManager;
 import persistence.PersistenceManager;
@@ -49,7 +48,7 @@ public class MainApp {
 
     private void start() throws IOException {
         // ⚠️ À adapter à ton chemin d'image
-        String imagePath = "C:\\Users\\salut\\Pictures\\Screenshots\\Capture d’écran 2025-11-14 131349.png";
+        String imagePath = "C:\\Github2\\google-map-mod-lisation\\w2.jpg";
         String jsonPath = "data.json";
 
         ImageSource source = new FileImageSource(imagePath);
@@ -71,15 +70,14 @@ public class MainApp {
         // Infrastructure
         CommandBus bus = new CommandBus();
         ClipboardMediator clipboard = new ClipboardMediator();
-        MementoCaretaker caretaker = new MementoCaretaker(); // Crée le Caretaker
         PersistenceManager persistence = new JsonPersistenceManager(jsonPath);
 
         // Contrôleurs
-        ZoomController zoomCtrl = new ZoomController(imageView, bus, caretaker);
+        ZoomController zoomCtrl = new ZoomController(imageView, bus);
         imageView.setZoomController(zoomCtrl); // Connecte le ZoomController à ImageView pour la roulette
-        new PanController(imageView, bus, caretaker); // s'accroche aux events souris
+        new PanController(imageView, bus); // s'accroche aux events souris
         UndoRedoController undoCtrl = new UndoRedoController(imageView, bus);
-        CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard, caretaker);
+        CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard);
         copyPasteCtrl.setStrategy(new CopyBoth());
         SaveController saveCtrl = new SaveController(imageView, bus, persistence);
         LoadController loadCtrl = new LoadController(imageView, bus, persistence, model);

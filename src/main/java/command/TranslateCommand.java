@@ -2,34 +2,29 @@ package command;
 
 import java.awt.Point;
 
-import model.MementoCaretaker;
 import model.Perspective;
-import model.PerspectiveMemento;
 
 /**
- * Commande Translate utilisant le pattern Memento pour l'undo/redo.
- * Sauvegarde l'état avant modification via le Caretaker.
+ * Commande Translate : sauvegarde un snapshot de l'état avant modification
+ * pour permettre l'undo/redo.
  */
 public class TranslateCommand implements Command {
 
     private final Perspective target;
     private final int dx, dy;
-    private final MementoCaretaker caretaker;
-    private PerspectiveMemento stateBefore;
+    private Perspective.Snapshot stateBefore;
 
-    public TranslateCommand(Perspective target, int dx, int dy, MementoCaretaker caretaker) {
+    public TranslateCommand(Perspective target, int dx, int dy) {
         this.target = target;
         this.dx = dx;
         this.dy = dy;
-        this.caretaker = caretaker;
     }
 
     @Override
     public void execute() {
         // Sauvegarde l'état AVANT la modification
-        stateBefore = target.createMemento();
-        caretaker.saveMemento(stateBefore);
-        
+        stateBefore = target.createSnapshot();
+
         // Effectue l'action
         Point t = target.getTranslation();
         target.setTranslation(new Point(t.x + dx, t.y + dy));
