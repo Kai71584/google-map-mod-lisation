@@ -1,22 +1,25 @@
 package view;
 
-import controller.ZoomController;
 import model.ImageModel;
 import model.Perspective;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.MouseWheelListener;
 import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageView extends AbstractImageView {
 
-    private ZoomController zoomController;
+    private final List<ImageViewListener> listeners = new ArrayList<>();
 
     public ImageView(ImageModel model, Perspective perspective) {
         super(model, perspective);
@@ -40,27 +43,53 @@ public class ImageView extends AbstractImageView {
             }
         });
 
-        // 🎯 Ajout du zoom à la roulette de la souris
+        // mouse wheel -> emit zoom event
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if (zoomController == null)
-                    return;
-
-                if (e.getPreciseWheelRotation() < 0) {
-                    // roule vers le haut → zoom IN
-                    zoomController.handleZoomIn();
-                } else {
-                    // roule vers le bas → zoom OUT
-                    zoomController.handleZoomOut();
+                double factor = (e.getPreciseWheelRotation() < 0) ? 1.1 : (1.0 / 1.1);
+                for (ImageViewListener l : listeners) {
+                    l.onZoomRequested(factor);
                 }
             }
         });
+
+        // drag -> emit pan deltas
+        MouseAdapter dragAdapter = new MouseAdapter() {
+            private int lastX, lastY;
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                lastX = e.getX();
+                lastY = e.getY();
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int dx = e.getX() - lastX;
+                int dy = e.getY() - lastY;
+                lastX = e.getX();
+                lastY = e.getY();
+                for (ImageViewListener l : listeners) {
+                    l.onPanDelta(dx, dy);
+                }
+            }
+        };
+        addMouseListener(dragAdapter);
+        addMouseMotionListener(dragAdapter);
     }
 
     // 🎯 Setter pour connecter le ZoomController
-    public void setZoomController(ZoomController controller) {
-        this.zoomController = controller;
+    /**
+     * Register a listener to receive view events (zoom, pan, copy, paste).
+     */
+    public void addImageViewListener(ImageViewListener listener) {
+        if (listener != null)
+            listeners.add(listener);
+    }
+
+    public void removeImageViewListener(ImageViewListener listener) {
+        listeners.remove(listener);
     }
 
     @Override

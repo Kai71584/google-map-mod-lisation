@@ -6,8 +6,10 @@ import command.CommandBus;
 import command.PasteCommand;
 import model.Perspective;
 import view.AbstractImageView;
+import view.ImageViewListener;
+import java.awt.Point;
 
-public class CopyPasteController extends AbstractController {
+public class CopyPasteController extends AbstractController implements ImageViewListener {
 
     private final ClipboardMediator clipboard;
 
@@ -46,5 +48,30 @@ public class CopyPasteController extends AbstractController {
             // Le médiateur orchestre : il applique la stratégie
             bus.execute(new PasteCommand(p, clipboard, clipboard.getCurrentStrategy()));
         }
+    }
+
+    @Override
+    public void onCopyRequested() {
+        handleCopy();
+    }
+
+    @Override
+    public void onPasteRequested() {
+        handlePaste();
+    }
+
+    @Override
+    public void onZoomRequested(double factor) {
+        // no-op
+    }
+
+    @Override
+    public void onPanDelta(int dx, int dy) {
+        // no-op
+    }
+
+    @Override
+    public void onThumbnailClick(Point imagePoint) {
+        // no-op
     }
 }

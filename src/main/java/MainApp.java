@@ -74,11 +74,14 @@ public class MainApp {
 
         // Contrôleurs
         ZoomController zoomCtrl = new ZoomController(imageView, bus);
-        imageView.setZoomController(zoomCtrl); // Connecte le ZoomController à ImageView pour la roulette
-        new PanController(imageView, bus); // s'accroche aux events souris
+        // Register controllers as listeners to decouple ImageView from controllers
+        imageView.addImageViewListener(zoomCtrl);
+        PanController panCtrl = new PanController(imageView, bus);
+        imageView.addImageViewListener(panCtrl);
         UndoRedoController undoCtrl = new UndoRedoController(imageView, bus);
         CopyPasteController copyPasteCtrl = new CopyPasteController(imageView, bus, clipboard);
         copyPasteCtrl.setStrategy(new CopyBoth());
+        imageView.addImageViewListener(copyPasteCtrl);
         SaveController saveCtrl = new SaveController(imageView, bus, persistence);
         LoadController loadCtrl = new LoadController(imageView, bus, persistence, model);
 
