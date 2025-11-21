@@ -48,7 +48,7 @@ public class MainApp {
     }
 
     private void start() throws IOException {
-        String imagePath = "C:\\GithubRepo\\google-map-mod-lisation\\w2.jpg";
+        String imagePath = "w2.jpg";
         String jsonPath = "data.json";
 
         ImageSource source = new FileImageSource(imagePath);
