@@ -1,6 +1,7 @@
 package command;
 
 import clipboard.ClipboardMediator;
+import clipboard.Colleague;
 import clipboard.CopyStrategy;
 import model.Perspective;
 
@@ -13,21 +14,25 @@ public class PasteCommand implements Command {
     private final Perspective target;
     private final ClipboardMediator clipboard;
     private final CopyStrategy strategy;
+    private final Colleague colleague;
     private Perspective.Snapshot stateBefore;
 
-    public PasteCommand(Perspective target, ClipboardMediator clipboard, CopyStrategy strategy) {
+    public PasteCommand(Perspective target, ClipboardMediator clipboard, CopyStrategy strategy, Colleague colleague) {
         this.target = target;
         this.clipboard = clipboard;
         this.strategy = strategy;
+        this.colleague = colleague;
     }
 
     @Override
     public void execute() {
+        if (colleague == null)
+            return;
         // Sauvegarde l'état AVANT la modification
         stateBefore = target.createSnapshot();
 
-        // Effectue l'action
-        strategy.apply(clipboard, target);
+        // Effectue l'action via le médiateur
+        clipboard.mediatePaste(colleague, strategy);
     }
 
     @Override

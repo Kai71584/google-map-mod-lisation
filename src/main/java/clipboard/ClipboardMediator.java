@@ -42,26 +42,41 @@ public class ClipboardMediator {
      * Change la stratégie de copie/collage
      */
     public void setStrategy(CopyStrategy strategy) {
-        this.currentStrategy = strategy;
+        this.currentStrategy = strategy != null ? strategy : this.currentStrategy;
     }
 
     /**
      * Médiation d'une demande de copie depuis une perspective
      */
-    public void mediateCopy(Perspective source) {
-        // Le médiateur orchestre : il récupère les données
-        this.scale = source.getScale();
-        this.translation = source.getTranslation();
+    public void mediateCopy(Colleague source) {
+        if (source == null)
+            return;
+        Perspective perspective = source.getPerspective();
+        if (perspective == null)
+            return;
+
+        this.scale = perspective.getScale();
+        this.translation = perspective.getTranslation();
+        notifyCopyDistributed(source);
     }
 
     /**
      * Médiation d'une demande de collage vers une perspective
      */
-    public void mediatePaste(Perspective target) {
-        // Le médiateur orchestre : il applique la stratégie
-        if (this.scale != null || this.translation != null) {
-            currentStrategy.apply(this, target);
-        }
+    public void mediatePaste(Colleague target, CopyStrategy strategy) {
+        if (target == null || isEmpty())
+            return;
+
+        Perspective perspective = target.getPerspective();
+        if (perspective == null)
+            return;
+
+        CopyStrategy effective = strategy != null ? strategy : currentStrategy;
+        if (effective == null)
+            return;
+
+        effective.apply(this, perspective);
+        target.receiveCopyData(scale, getTranslation());
     }
 
     /**
@@ -81,6 +96,14 @@ public class ClipboardMediator {
 
     public boolean isEmpty() {
         return scale == null && translation == null;
+    }
+
+    private void notifyCopyDistributed(Colleague origin) {
+        for (Colleague colleague : colleagues) {
+            if (colleague != origin) {
+                colleague.receiveCopyData(scale, getTranslation());
+            }
+        }
     }
 }
 

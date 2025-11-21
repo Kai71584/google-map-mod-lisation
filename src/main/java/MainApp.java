@@ -48,8 +48,7 @@ public class MainApp {
     }
 
     private void start() throws IOException {
-        // ⚠️ À adapter à ton chemin d'image
-        String imagePath = "C:\\Users\\salut\\Pictures\\Screenshots\\Capture d’écran 2025-11-16 172622.png";
+        String imagePath = "C:\\GithubRepo\\google-map-mod-lisation\\w2.jpg";
         String jsonPath = "data.json";
 
         ImageSource source = new FileImageSource(imagePath);
