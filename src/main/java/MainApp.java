@@ -14,7 +14,8 @@ import javax.swing.SwingUtilities;
 
 import clipboard.ClipboardMediator;
 import clipboard.CopyBoth;
-import clipboard.CopyTranslationXOnly;
+import clipboard.CopyScaleOnly;
+import clipboard.CopyTranslationOnly;
 import command.CommandBus;
 import controller.CopyPasteController;
 import controller.LoadController;
@@ -48,7 +49,7 @@ public class MainApp {
 
     private void start() throws IOException {
         // ⚠️ À adapter à ton chemin d'image
-        String imagePath = "C:\\Github2\\google-map-mod-lisation\\w2.jpg";
+        String imagePath = "C:\\Users\\salut\\Pictures\\Screenshots\\Capture d’écran 2025-11-16 172622.png";
         String jsonPath = "data.json";
 
         ImageSource source = new FileImageSource(imagePath);
@@ -96,23 +97,36 @@ public class MainApp {
         JButton btnUndo = new JButton("Undo");
         JButton btnRedo = new JButton("Redo");
         JButton btnCopy = new JButton("Copy");
-        JButton btnCopyX = new JButton("Copy X");
+        JButton btnCopyX = new JButton("Copy T");
+        JButton btnCopyZ = new JButton("Copy Z");
         JButton btnPaste = new JButton("Paste");
-        JButton btnPasteX = new JButton("Paste X");
+        JButton btnPasteX = new JButton("Paste T");
+        JButton btnPasteZ = new JButton("Paste Z");
         JButton btnSave = new JButton("Save");
 
         btnPlus.addActionListener(e -> zoomCtrl.handleZoomIn());
         btnMinus.addActionListener(e -> zoomCtrl.handleZoomOut());
         btnUndo.addActionListener(e -> undoCtrl.handleUndo());
         btnRedo.addActionListener(e -> undoCtrl.handleRedo());
-        btnCopy.addActionListener(e -> copyPasteCtrl.handleCopy());
+        btnCopy.addActionListener(e -> {
+            copyPasteCtrl.setStrategy(new CopyBoth());
+            copyPasteCtrl.handleCopy();
+        });
+        btnCopyZ.addActionListener(e -> {
+            copyPasteCtrl.setStrategy(new CopyScaleOnly());
+            copyPasteCtrl.handleCopy();
+        });
+        btnPasteZ.addActionListener(e -> {
+            copyPasteCtrl.setStrategy(new CopyScaleOnly());
+            copyPasteCtrl.handlePaste();
+        });
         btnCopyX.addActionListener(e -> {
-            copyPasteCtrl.setStrategy(new CopyTranslationXOnly());
+            copyPasteCtrl.setStrategy(new CopyTranslationOnly());
             copyPasteCtrl.handleCopy();
         });
         btnPaste.addActionListener(e -> copyPasteCtrl.handlePaste());
         btnPasteX.addActionListener(e -> {
-            copyPasteCtrl.setStrategy(new CopyTranslationXOnly());
+            copyPasteCtrl.setStrategy(new CopyTranslationOnly());
             copyPasteCtrl.handlePaste();
         });
         btnSave.addActionListener(e -> saveCtrl.handleSave());
@@ -123,9 +137,12 @@ public class MainApp {
         controls.add(btnRedo);
         controls.add(btnCopy);
         controls.add(btnCopyX);
+        controls.add(btnCopyZ);
         controls.add(btnPaste);
         controls.add(btnPasteX);
+        controls.add(btnPasteZ);
         controls.add(btnSave);
+        
 
         // Charger les perspectives depuis data.json
         List<Perspective> loaded = loadCtrl.handleLoadAll();
