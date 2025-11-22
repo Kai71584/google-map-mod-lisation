@@ -17,23 +17,46 @@ import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ImageView
+ *
+ * Vue principale affichant l’image zoomable/pannable.
+ * Elle gère :
+ *  - l’affichage de l’image avec transformation (zoom + translation)
+ *  - la redirection des intentions utilisateur (zoom, pan, clic, etc.)
+ *  - la gestion de la vignette (thumbnail) en overlay
+ *
+ * Cette classe ne contient pas de logique métier : elle notifie simplement
+ * les contrôleurs via ImageViewListener (pattern MVC + Observer).
+ */
 public class ImageView extends AbstractImageView {
 
+    // Liste des listeners qui recevront les intentions utilisateur
     private final List<ImageViewListener> listeners = new ArrayList<>();
 
+    /**
+     * Constructeur : installe la vue, les interactions et la miniature.
+     */
     public ImageView(ImageModel model, Perspective perspective) {
         super(model, perspective);
-        // make layout null so we can position overlay thumbnail absolutely
+
+        // On désactive le layout manager pour positionner la vignette en absolu (overlay)
         setLayout(null);
 
-        // create thumbnail overlay and add it
+        // --- Création de la vignette (thumbnail) ---
         Dimension thumbPref = new Dimension(200, 140);
         ThumbnailView thumb = new ThumbnailView(model, perspective, this, thumbPref);
         add(thumb);
-        // initial placement (will be corrected on first resize)
-        thumb.setBounds(Math.max(0, getWidth() - thumbPref.width - 10), 10, thumbPref.width, thumbPref.height);
 
-        // reposition thumbnail when the main view is resized
+        // Positionnement initial de la vignette (sera ajusté au resize)
+        thumb.setBounds(
+            Math.max(0, getWidth() - thumbPref.width - 10),
+            10,
+            thumbPref.width,
+            thumbPref.height
+        );
+
+        // --- Repositionnement automatique de la vignette lors d’un resize ---
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -43,71 +66,97 @@ public class ImageView extends AbstractImageView {
             }
         });
 
-        // mouse wheel -> emit zoom event
+        // --- Zoom souris (molette) ---
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                double factor = (e.getPreciseWheelRotation() < 0) ? 1.1 : (1.0 / 1.1);
+                // rotation négative = zoom avant
+                double factor = (e.getPreciseWheelRotation() < 0)
+                        ? 1.1
+                        : (1.0 / 1.1);
+
+                // On notifie tous les listeners
                 for (ImageViewListener l : listeners) {
                     l.onZoomRequested(factor);
                 }
             }
         });
 
-        // drag -> emit pan deltas
+        // --- Pan (drag souris) ---
         MouseAdapter dragAdapter = new MouseAdapter() {
             private int lastX, lastY;
 
             @Override
             public void mousePressed(MouseEvent e) {
+                // On mémorise la position initiale pour mesurer le delta
                 lastX = e.getX();
                 lastY = e.getY();
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                // Calcul des déplacements
                 int dx = e.getX() - lastX;
                 int dy = e.getY() - lastY;
+
+                // Mise à jour du point de référence
                 lastX = e.getX();
                 lastY = e.getY();
+
+                // Notifie tous les listeners
                 for (ImageViewListener l : listeners) {
                     l.onPanDelta(dx, dy);
                 }
             }
         };
+
+        // On écoute clics + drags
         addMouseListener(dragAdapter);
         addMouseMotionListener(dragAdapter);
     }
 
-    // 🎯 Setter pour connecter le ZoomController
+    // 🔌 Connexion d’un contrôleur (ZoomController, PanController, etc.)
     /**
-     * Register a listener to receive view events (zoom, pan, copy, paste).
+     * Ajoute un listener pour recevoir les événements utilisateur.
      */
     public void addImageViewListener(ImageViewListener listener) {
         if (listener != null)
             listeners.add(listener);
     }
 
+    /**
+     * Supprime un listener.
+     */
     public void removeImageViewListener(ImageViewListener listener) {
         listeners.remove(listener);
     }
 
+    /**
+     * Méthode Template Method à implémenter depuis AbstractImageView.
+     * Rend l’image transformée dans le Graphics2D.
+     */
     @Override
     protected void render(Graphics2D g2d) {
         BufferedImage img = model.getSource().image();
         if (img == null)
             return;
 
-        double s = perspective.getScale();
-        var t = perspective.getTranslation();
+        double s = perspective.getScale();      // facteur de zoom
+        var t = perspective.getTranslation();   // translation en pixels
 
+        // Transformation complète : translation + zoom + recentrage de l'image
         AffineTransform at = new AffineTransform();
         at.translate(getWidth() / 2.0 + t.x, getHeight() / 2.0 + t.y);
         at.scale(s, s);
         at.translate(-img.getWidth() / 2.0, -img.getHeight() / 2.0);
 
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        // Interpolation douce pour une meilleure qualité de zoom
+        g2d.setRenderingHint(
+            RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BILINEAR
+        );
+
+        // Dessine l'image transformée
         g2d.drawImage(img, at, null);
     }
 }
