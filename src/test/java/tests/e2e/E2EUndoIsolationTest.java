@@ -108,21 +108,24 @@ public class E2EUndoIsolationTest {
         // Arrange : Actions multiples sur A et B
         bus.execute(new ZoomCommand(perspectiveA, 2.0));
         bus.execute(new TranslateCommand(perspectiveA, 10, 20));
+        bus.execute(new ZoomCommand(perspectiveA, 3.0)); // Dernier zoom sur A
         
         bus.execute(new ZoomCommand(perspectiveB, 1.5));
         bus.execute(new TranslateCommand(perspectiveB, 30, 40));
         
         // Capturer les états après actions
-        double scaleA = perspectiveA.getScale();
-        double scaleB = perspectiveB.getScale();
+        double scaleAAfterZoom = perspectiveA.getScale(); // 3.0
+        double scaleBAfterZoom = perspectiveB.getScale(); // 1.5
         
-        // Act : Undo sur A
+        // Act : Undo sur A (doit annuler le dernier ZoomCommand sur A)
         undoCtrl.handleUndo();
         
-        // Assert : Seule A change
-        assertNotEquals(scaleA, perspectiveA.getScale(), 
-            "A doit changer après undo");
-        assertEquals(scaleB, perspectiveB.getScale(), 0.001, 
+        // Assert : Seule A change (revient au zoom précédent)
+        assertEquals(2.0, perspectiveA.getScale(), 0.001,
+            "A doit revenir au zoom précédent après undo");
+        assertNotEquals(scaleAAfterZoom, perspectiveA.getScale(),
+            "A doit avoir changé après undo");
+        assertEquals(scaleBAfterZoom, perspectiveB.getScale(), 0.001, 
             "B ne doit pas changer");
     }
 
