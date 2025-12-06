@@ -1,20 +1,22 @@
 package tests.e2e;
 
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
 
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import command.CommandBus;
+import command.TranslateCommand;
+import command.ZoomCommand;
+import controller.UndoRedoController;
 import model.ImageModel;
 import model.ImageSource;
-import model.FileImageSource;
 import model.Perspective;
-import command.CommandBus;
-import command.ZoomCommand;
-import command.TranslateCommand;
-import controller.UndoRedoController;
 import view.AbstractImageView;
 import view.ImageView;
-
-import java.io.IOException;
 
 /**
  * Tests E2E : Isolation Undo/Redo par perspective
@@ -39,9 +41,8 @@ public class E2EUndoIsolationTest {
         // Configuration mode headless pour Swing
         System.setProperty("java.awt.headless", "true");
         
-        // Création d'une source d'image de test
-        // TODO: Utiliser une image de test réelle dans src/test/resources/test/
-        imageSource = new FileImageSource("w2.jpg");
+        // Création d'une source d'image mock (pas de dépendance fichier)
+        imageSource = new MockImageSource();
         
         // Création du modèle
         model = new ImageModel(imageSource);
@@ -168,6 +169,17 @@ public class E2EUndoIsolationTest {
         // Assert : B revient à 1.0, A reste à 2.0
         assertEquals(1.0, perspectiveB.getScale(), 0.001);
         assertEquals(2.0, perspectiveA.getScale(), 0.001);
+    }
+
+    /**
+     * Mock implementation of ImageSource for testing.
+     * No file dependency - works on any computer.
+     */
+    private static class MockImageSource implements ImageSource {
+        @Override
+        public java.awt.image.BufferedImage image() {
+            return null; // Not needed for command testing
+        }
     }
 }
 
