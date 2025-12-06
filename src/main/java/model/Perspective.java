@@ -118,6 +118,14 @@ public class Perspective extends AbstractSubject {
             this.translation = translation == null ? new Point(0, 0) : new Point(translation);
         }
 
+        public double getScale() {
+            return scale;
+        }
+
+        public Point getTranslation() {
+            return new Point(translation);
+        }
+
         @Override
         public String toString() {
             return "Perspective.Snapshot{" +
