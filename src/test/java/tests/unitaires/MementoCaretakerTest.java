@@ -1,4 +1,4 @@
-package tests;
+package tests.unitaires;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
