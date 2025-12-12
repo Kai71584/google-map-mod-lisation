@@ -112,7 +112,7 @@ class ImageViewer2 extends JPanel {
     private void sauvegarderEtat() {
         historique.push(new ViewState(translateX, translateY, zoom));
         // Limite facultative pour éviter que la pile ne grossisse indéfiniment
-        if (historique.size() > 100) historique.removeFirst();
+        if (historique.size() > 100) historique.remove(0);
     }
 
     public void annulerDerniereAction() {
