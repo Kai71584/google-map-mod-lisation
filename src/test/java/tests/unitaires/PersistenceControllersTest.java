@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.function.Executable;
 
 import command.CommandBus;
 import controller.LoadController;
@@ -64,13 +65,21 @@ public class PersistenceControllersTest {
 
     @Test
     void testSaveControllerInitialization() {
-        // Act & Assert
-        assertNotNull(saveController, "SaveController should be initialized");
-        assertEquals(mockImageView, saveController.getView(), "View should be stored");
+        // Arrange
+
+        // Act
+        SaveController controller = saveController;
+        AbstractImageView view = saveController.getView();
+
+        // Assert
+        assertNotNull(controller, "SaveController should be initialized");
+        assertEquals(mockImageView, view, "View should be stored");
     }
 
     @Test
     void testSaveControllerGetView() {
+        // Arrange
+
         // Act
         AbstractImageView view = saveController.getView();
 
@@ -85,11 +94,12 @@ public class PersistenceControllersTest {
         perspective.setScale(2.5);
         perspective.setTranslation(new java.awt.Point(75, 75));
 
-        // Act - Save the perspective
+        // Act
         persistenceManager.save(perspective);
+        boolean fileExists = new File(tempDir, "test_persistence.json").exists();
 
-        // Assert - Verify file was created
-        assertTrue(new File(tempDir, "test_persistence.json").exists(),
+        // Assert
+        assertTrue(fileExists,
             "Persistence file should be created after save");
     }
 
@@ -100,12 +110,12 @@ public class PersistenceControllersTest {
 
         // Act
         persistenceManager.save(perspective);
-
-        // Assert - Load and verify
         ImageModel newModel = new ImageModel(new MockImageSource());
         persistenceManager.loadAll(newModel);
+        double loadedScale = newModel.getPerspectives().get(0).getScale();
 
-        assertEquals(3.5, newModel.getPerspectives().get(0).getScale(), 0.001);
+        // Assert
+        assertEquals(3.5, loadedScale, 0.001);
     }
 
     @Test
@@ -115,13 +125,13 @@ public class PersistenceControllersTest {
 
         // Act
         persistenceManager.save(perspective);
-
-        // Assert - Load and verify
         ImageModel newModel = new ImageModel(new MockImageSource());
         persistenceManager.loadAll(newModel);
+        Perspective loadedPerspective = newModel.getPerspectives().get(0);
 
-        assertEquals(100, newModel.getPerspectives().get(0).getTranslation().x);
-        assertEquals(150, newModel.getPerspectives().get(0).getTranslation().y);
+        // Assert
+        assertEquals(100, loadedPerspective.getTranslation().x);
+        assertEquals(150, loadedPerspective.getTranslation().y);
     }
 
     @Test
@@ -133,12 +143,11 @@ public class PersistenceControllersTest {
 
         // Act
         persistenceManager.save(perspective);
-
-        // Assert
         ImageModel newModel = new ImageModel(new MockImageSource());
         persistenceManager.loadAll(newModel);
-
         Perspective loaded = newModel.getPerspectives().get(0);
+
+        // Assert
         assertEquals(3.5, loaded.getScale(), 0.001);
         assertEquals(100, loaded.getTranslation().x);
         assertEquals(150, loaded.getTranslation().y);
@@ -148,9 +157,15 @@ public class PersistenceControllersTest {
 
     @Test
     void testLoadControllerInitialization() {
-        // Act & Assert
-        assertNotNull(loadController, "LoadController should be initialized");
-        assertEquals(mockImageView, loadController.getView(), "View should be stored");
+        // Arrange
+
+        // Act
+        LoadController controller = loadController;
+        AbstractImageView view = loadController.getView();
+
+        // Assert
+        assertNotNull(controller, "LoadController should be initialized");
+        assertEquals(mockImageView, view, "View should be stored");
     }
 
     @Test
@@ -167,9 +182,10 @@ public class PersistenceControllersTest {
 
         // Act
         loader.handleLoadAll();
+        int loadedCount = emptyModel.getPerspectives().size();
 
         // Assert
-        assertEquals(1, emptyModel.getPerspectives().size(),
+        assertEquals(1, loadedCount,
             "Should have loaded one perspective");
     }
 
@@ -195,9 +211,10 @@ public class PersistenceControllersTest {
 
         // Act
         loader.handleLoadAll();
+        int loadedCount = emptyModel.getPerspectives().size();
 
         // Assert
-        assertEquals(3, emptyModel.getPerspectives().size(),
+        assertEquals(3, loadedCount,
             "Should have loaded three perspectives");
         assertEquals("Perspective 1", emptyModel.getPerspectives().get(0).getName());
         assertEquals("Perspective 2", emptyModel.getPerspectives().get(1).getName());
@@ -219,9 +236,9 @@ public class PersistenceControllersTest {
 
         // Act
         loader.handleLoadAll();
+        Perspective loaded = newModel.getPerspectives().get(0);
 
         // Assert
-        Perspective loaded = newModel.getPerspectives().get(0);
         assertEquals(4.2, loaded.getScale(), 0.001, "Scale should match");
         assertEquals(250, loaded.getTranslation().x, "Translation X should match");
         assertEquals(300, loaded.getTranslation().y, "Translation Y should match");
@@ -234,10 +251,14 @@ public class PersistenceControllersTest {
         MockImageView emptyView = new MockImageView(emptyModel, null);
         LoadController loader = new LoadController(emptyView, commandBus, persistenceManager, emptyModel);
 
-        // Act & Assert
-        assertDoesNotThrow(() -> loader.handleLoadAll(),
+        // Act
+        Executable loadAll = () -> loader.handleLoadAll();
+
+        // Assert
+        assertDoesNotThrow(loadAll,
             "LoadController should handle empty persistence gracefully");
-        assertEquals(0, emptyModel.getPerspectives().size(),
+        int loadedCount = emptyModel.getPerspectives().size();
+        assertEquals(0, loadedCount,
             "Model should remain empty");
     }
 
@@ -248,18 +269,17 @@ public class PersistenceControllersTest {
         perspective.setTranslation(new java.awt.Point(111, 222));
         perspective.setName("Test Cycle");
 
-        // Act - Save
+        // Act
         persistenceManager.save(perspective);
-
-        // Create new model and load
         ImageModel newModel = new ImageModel(new MockImageSource());
         MockImageView newView = new MockImageView(newModel, null);
         LoadController loader = new LoadController(newView, commandBus, persistenceManager, newModel);
         loader.handleLoadAll();
+        int loadedCount = newModel.getPerspectives().size();
+        Perspective loaded = newModel.getPerspectives().get(0);
 
         // Assert
-        assertEquals(1, newModel.getPerspectives().size());
-        Perspective loaded = newModel.getPerspectives().get(0);
+        assertEquals(1, loadedCount);
         assertEquals(2.7, loaded.getScale(), 0.001);
         assertEquals(111, loaded.getTranslation().x);
         assertEquals(222, loaded.getTranslation().y);

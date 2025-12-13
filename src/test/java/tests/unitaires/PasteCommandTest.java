@@ -51,25 +51,35 @@ public class PasteCommandTest {
 
     @Test
     public void testPasteBothScaleAndTranslation() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyBoth(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(2.0, target.getScale(), 0.001, "Scale should be copied to 2.0");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(2.0, resultingScale, 0.001, "Scale should be copied to 2.0");
         assertEquals(100, translation.x, "Translation X should be copied to 100");
         assertEquals(50, translation.y, "Translation Y should be copied to 50");
     }
 
     @Test
     public void testPasteBothAndUndo() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyBoth(), targetColleague);
         command.execute();
+
+        // Act
         command.undo();
-        
-        assertEquals(1.0, target.getScale(), 0.001, "Scale should be restored to 1.0");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(1.0, resultingScale, 0.001, "Scale should be restored to 1.0");
         assertEquals(0, translation.x, "Translation X should be restored to 0");
         assertEquals(0, translation.y, "Translation Y should be restored to 0");
     }
@@ -78,35 +88,48 @@ public class PasteCommandTest {
 
     @Test
     public void testPasteScaleOnly() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyScaleOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(2.0, target.getScale(), 0.001, "Scale should be copied to 2.0");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(2.0, resultingScale, 0.001, "Scale should be copied to 2.0");
         assertEquals(0, translation.x, "Translation X should remain 0");
         assertEquals(0, translation.y, "Translation Y should remain 0");
     }
 
     @Test
     public void testPasteScaleOnlyAndUndo() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyScaleOnly(), targetColleague);
         command.execute();
+
+        // Act
         command.undo();
-        
-        assertEquals(1.0, target.getScale(), 0.001, "Scale should be restored to 1.0");
+        double resultingScale = target.getScale();
+
+        // Assert
+        assertEquals(1.0, resultingScale, 0.001, "Scale should be restored to 1.0");
     }
 
     @Test
     public void testPasteScaleOnlyPreservesTranslation() {
+        // Arrange
         target.setTranslation(new Point(50, 75));
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyScaleOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
         Point translation = target.getTranslation();
+
+        // Assert
         assertEquals(50, translation.x, "Translation X should remain 50");
         assertEquals(75, translation.y, "Translation Y should remain 75");
     }
@@ -115,79 +138,102 @@ public class PasteCommandTest {
 
     @Test
     public void testPasteTranslationOnly() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(1.0, target.getScale(), 0.001, "Scale should remain 1.0");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(1.0, resultingScale, 0.001, "Scale should remain 1.0");
         assertEquals(100, translation.x, "Translation X should be copied to 100");
         assertEquals(50, translation.y, "Translation Y should be copied to 50");
     }
 
     @Test
     public void testPasteTranslationOnlyAndUndo() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationOnly(), targetColleague);
         command.execute();
+
+        // Act
         command.undo();
-        
         Point translation = target.getTranslation();
+
+        // Assert
         assertEquals(0, translation.x, "Translation X should be restored to 0");
         assertEquals(0, translation.y, "Translation Y should be restored to 0");
     }
 
     @Test
     public void testPasteTranslationOnlyPreservesScale() {
+        // Arrange
         target.setScale(2.5);
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(2.5, target.getScale(), 0.001, "Scale should remain 2.5");
+        double resultingScale = target.getScale();
+
+        // Assert
+        assertEquals(2.5, resultingScale, 0.001, "Scale should remain 2.5");
     }
 
     // ========== TESTS COPY TRANSLATION X ONLY ==========
 
     @Test
     public void testPasteTranslationXOnly() {
+        // Arrange
         target.setTranslation(new Point(0, 75));
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationXOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
         Point translation = target.getTranslation();
+
+        // Assert
         assertEquals(100, translation.x, "Translation X should be copied to 100");
         assertEquals(75, translation.y, "Translation Y should remain 75");
     }
 
     @Test
     public void testPasteTranslationXOnlyAndUndo() {
+        // Arrange
         target.setTranslation(new Point(0, 75));
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationXOnly(), targetColleague);
         command.execute();
+
+        // Act
         command.undo();
-        
         Point translation = target.getTranslation();
+
+        // Assert
         assertEquals(0, translation.x, "Translation X should be restored to 0");
         assertEquals(75, translation.y, "Translation Y should remain 75");
     }
 
     @Test
     public void testPasteTranslationXOnlyPreservesScaleAndY() {
+        // Arrange
         target.setScale(2.5);
         target.setTranslation(new Point(50, 100));
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyTranslationXOnly(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(2.5, target.getScale(), 0.001, "Scale should remain 2.5");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(2.5, resultingScale, 0.001, "Scale should remain 2.5");
         assertEquals(100, translation.x, "Translation X should be 100");
         assertEquals(100, translation.y, "Translation Y should remain 100");
     }
@@ -196,78 +242,95 @@ public class PasteCommandTest {
 
     @Test
     public void testPasteNone() {
+        // Arrange
         target.setScale(2.5);
         target.setTranslation(new Point(75, 100));
-        
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyNone(), targetColleague);
+
+        // Act
         command.execute();
-        
-        assertEquals(2.5, target.getScale(), 0.001, "Scale should remain unchanged");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(2.5, resultingScale, 0.001, "Scale should remain unchanged");
         assertEquals(75, translation.x, "Translation X should remain unchanged");
         assertEquals(100, translation.y, "Translation Y should remain unchanged");
     }
 
     @Test
     public void testPasteNoneAndUndo() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyNone(), targetColleague);
         command.execute();
+
+        // Act
         command.undo();
-        
-        // Should be same as before since nothing was changed
-        assertEquals(1.0, target.getScale(), 0.001, "Scale should be 1.0");
+        double resultingScale = target.getScale();
+
+        // Assert
+        assertEquals(1.0, resultingScale, 0.001, "Scale should be 1.0");
     }
 
     // ========== TESTS TARGET ==========
 
     @Test
     public void testTargetReturnsCorrectPerspective() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyBoth(), targetColleague);
-        
-        assertEquals(target, command.target(), "target() should return the target perspective");
+
+        // Act
+        Perspective result = command.target();
+
+        // Assert
+        assertEquals(target, result, "target() should return the target perspective");
     }
 
     // ========== TESTS MULTIPLE PASTES ==========
 
     @Test
     public void testMultiplePastesWithDifferentStrategies() {
+        // Arrange
         source.setScale(3.0);
         source.setTranslation(new Point(200, 100));
-        
         clipboard.mediateCopy(sourceColleague);
-        
-        // First paste: copy scale only
+
+        // Act
         command = new PasteCommand(target, clipboard, new CopyScaleOnly(), targetColleague);
         command.execute();
-        assertEquals(3.0, target.getScale(), 0.001);
-        
-        // Second paste: copy translation only (on same target)
         clipboard.mediateCopy(sourceColleague);
         PasteCommand command2 = new PasteCommand(target, clipboard, new CopyTranslationOnly(), targetColleague);
         command2.execute();
-        
-        assertEquals(3.0, target.getScale(), 0.001, "Scale should remain 3.0");
+        double resultingScale = target.getScale();
         Point translation = target.getTranslation();
+
+        // Assert
+        assertEquals(3.0, resultingScale, 0.001, "Scale should remain 3.0");
         assertEquals(200, translation.x, "Translation X should be 200");
         assertEquals(100, translation.y, "Translation Y should be 100");
     }
 
     @Test
     public void testPasteAndUndoSequence() {
+        // Arrange
         clipboard.mediateCopy(sourceColleague);
         command = new PasteCommand(target, clipboard, new CopyBoth(), targetColleague);
-        
+
+        // Act
         command.execute();
-        assertEquals(2.0, target.getScale(), 0.001);
-        
+        double afterFirstExecute = target.getScale();
         command.undo();
-        assertEquals(1.0, target.getScale(), 0.001);
-        
+        double afterUndo = target.getScale();
         command.execute();
-        assertEquals(2.0, target.getScale(), 0.001);
+        double afterSecondExecute = target.getScale();
+
+        // Assert
+        assertEquals(2.0, afterFirstExecute, 0.001);
+        assertEquals(1.0, afterUndo, 0.001);
+        assertEquals(2.0, afterSecondExecute, 0.001);
     }
 
     // ========== MOCK COLLEAGUE HELPER ==========

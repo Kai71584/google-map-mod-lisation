@@ -31,66 +31,100 @@ public class MementoCaretakerTest {
 
     @Test
     public void testSaveMementoIncrementsUndoStack() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
+
+        // Act
         caretaker.saveMemento(snapshot);
         
+        // Assert
         assertEquals(1, caretaker.undoDepth(), "Undo stack should contain 1 snapshot");
     }
 
     @Test
     public void testSaveMentoMultipleSnapshots() {
+        // Arrange
         for (int i = 1; i <= 3; i++) {
             perspective.setScale(1.0 + i);
             caretaker.saveMemento(perspective.createSnapshot());
         }
-        
-        assertEquals(3, caretaker.undoDepth(), "Undo stack should contain 3 snapshots");
+
+        // Act
+        int undoDepth = caretaker.undoDepth();
+
+        // Assert
+        assertEquals(3, undoDepth, "Undo stack should contain 3 snapshots");
     }
 
     // ========== TESTS CAN UNDO ==========
 
     @Test
     public void testCanUndoReturnsFalseWhenEmpty() {
-        assertFalse(caretaker.canUndo(), "canUndo should be false on empty stack");
+        // Arrange
+
+        // Act
+        boolean canUndo = caretaker.canUndo();
+
+        // Assert
+        assertFalse(canUndo, "canUndo should be false on empty stack");
     }
 
     @Test
     public void testCanUndoReturnsTrueAfterSave() {
+        // Arrange
         perspective.setScale(1.5);
         Snapshot snapshot = perspective.createSnapshot();
+
+        // Act
         caretaker.saveMemento(snapshot);
-        
-        assertTrue(caretaker.canUndo(), "canUndo should be true after saving");
+        boolean canUndo = caretaker.canUndo();
+
+        // Assert
+        assertTrue(canUndo, "canUndo should be true after saving");
     }
 
     // ========== TESTS POP UNDO ==========
 
     @Test
     public void testPopUndoReturnsSnapshot() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
         caretaker.saveMemento(snapshot);
         
+        // Act
         Snapshot popped = caretaker.popUndo();
+
+        // Assert
         assertNotNull(popped, "popUndo should return a snapshot");
     }
 
     @Test
     public void testPopUndoMovesSnapshotToRedoStack() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
         caretaker.saveMemento(snapshot);
         
+        // Act
         caretaker.popUndo();
-        
-        assertEquals(1, caretaker.redoDepth(), "Redo stack should contain 1 snapshot");
-        assertEquals(0, caretaker.undoDepth(), "Undo stack should be empty");
+        int redoDepth = caretaker.redoDepth();
+        int undoDepth = caretaker.undoDepth();
+
+        // Assert
+        assertEquals(1, redoDepth, "Redo stack should contain 1 snapshot");
+        assertEquals(0, undoDepth, "Undo stack should be empty");
     }
 
     @Test
     public void testPopUndoReturnsNullWhenEmpty() {
+        // Arrange
+
+        // Act
         Snapshot result = caretaker.popUndo();
+
+        // Assert
         assertNull(result, "popUndo should return null when empty");
     }
 
@@ -98,48 +132,71 @@ public class MementoCaretakerTest {
 
     @Test
     public void testCanRedoReturnsFalseInitially() {
-        assertFalse(caretaker.canRedo(), "canRedo should be false initially");
+        // Arrange
+
+        // Act
+        boolean canRedo = caretaker.canRedo();
+
+        // Assert
+        assertFalse(canRedo, "canRedo should be false initially");
     }
 
     @Test
     public void testCanRedoReturnsTrueAfterUndo() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
         caretaker.saveMemento(snapshot);
         caretaker.popUndo();
+
+        // Act
+        boolean canRedo = caretaker.canRedo();
         
-        assertTrue(caretaker.canRedo(), "canRedo should be true after popUndo");
+        // Assert
+        assertTrue(canRedo, "canRedo should be true after popUndo");
     }
 
     // ========== TESTS POP REDO ==========
 
     @Test
     public void testPopRedoReturnsSnapshot() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
         caretaker.saveMemento(snapshot);
         caretaker.popUndo();
-        
+
+        // Act
         Snapshot redoSnapshot = caretaker.popRedo();
+
+        // Assert
         assertNotNull(redoSnapshot, "popRedo should return a snapshot");
     }
 
     @Test
     public void testPopRedoMovesSnapshotBackToUndoStack() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot = perspective.createSnapshot();
         caretaker.saveMemento(snapshot);
         caretaker.popUndo();
-        
+
+        // Act
         caretaker.popRedo();
-        
+
+        // Assert
         assertEquals(1, caretaker.undoDepth(), "Undo stack should contain 1 snapshot");
         assertEquals(0, caretaker.redoDepth(), "Redo stack should be empty");
     }
 
     @Test
     public void testPopRedoReturnsNullWhenEmpty() {
+        // Arrange
+
+        // Act
         Snapshot result = caretaker.popRedo();
+
+        // Assert
         assertNull(result, "popRedo should return null when empty");
     }
 
@@ -147,6 +204,7 @@ public class MementoCaretakerTest {
 
     @Test
     public void testSaveMementoAfterUndoClearsRedoStack() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot1 = perspective.createSnapshot();
         caretaker.saveMemento(snapshot1);
@@ -154,20 +212,14 @@ public class MementoCaretakerTest {
         perspective.setScale(2.5);
         Snapshot snapshot2 = perspective.createSnapshot();
         caretaker.saveMemento(snapshot2);
-        
-        // After 2 saves, we have 2 in undo
-        assertEquals(2, caretaker.undoDepth(), "Should have 2 in undo before popUndo");
-        
-        caretaker.popUndo(); // Move snapshot2 to redo, now undo has 1
-        
-        assertEquals(1, caretaker.undoDepth(), "Should have 1 in undo after popUndo");
-        assertEquals(1, caretaker.redoDepth(), "Should have 1 in redo after popUndo");
-        
-        // Save a new snapshot
+        caretaker.popUndo();
+
+        // Act
         perspective.setScale(3.0);
         Snapshot snapshot3 = perspective.createSnapshot();
         caretaker.saveMemento(snapshot3);
         
+        // Assert
         assertEquals(0, caretaker.redoDepth(), "Redo stack should be cleared");
         assertEquals(2, caretaker.undoDepth(), "Undo stack should have 2 snapshots (1 old + 1 new)");
     }
@@ -176,16 +228,18 @@ public class MementoCaretakerTest {
 
     @Test
     public void testClearRemovesAllSnapshots() {
+        // Arrange
         perspective.setScale(2.0);
         Snapshot snapshot1 = perspective.createSnapshot();
         caretaker.saveMemento(snapshot1);
-        
         perspective.setScale(3.0);
         Snapshot snapshot2 = perspective.createSnapshot();
         caretaker.saveMemento(snapshot2);
-        
+
+        // Act
         caretaker.clear();
         
+        // Assert
         assertEquals(0, caretaker.undoDepth(), "Undo stack should be empty");
         assertEquals(0, caretaker.redoDepth(), "Redo stack should be empty");
         assertFalse(caretaker.canUndo(), "canUndo should be false after clear");
@@ -196,65 +250,59 @@ public class MementoCaretakerTest {
 
     @Test
     public void testUndoRedoSequence() {
-        // Save 3 snapshots
+        // Arrange
         for (int i = 1; i <= 3; i++) {
             perspective.setScale(1.0 + i);
             caretaker.saveMemento(perspective.createSnapshot());
         }
-        
-        // Undo once
+
+        // Act
         caretaker.popUndo();
-        assertEquals(2, caretaker.undoDepth(), "Should have 2 snapshots after first undo");
-        assertEquals(1, caretaker.redoDepth(), "Should have 1 snapshot in redo");
-        
-        // Undo again
         caretaker.popUndo();
-        assertEquals(1, caretaker.undoDepth(), "Should have 1 snapshot after second undo");
-        assertEquals(2, caretaker.redoDepth(), "Should have 2 snapshots in redo");
-        
-        // Redo once
         caretaker.popRedo();
+
+        // Assert
         assertEquals(2, caretaker.undoDepth(), "Should have 2 snapshots after redo");
         assertEquals(1, caretaker.redoDepth(), "Should have 1 snapshot in redo");
     }
 
     @Test
     public void testComplexUndoRedoWithNewSave() {
-        // Save snapshot 1
+        // Arrange
         perspective.setScale(1.5);
         caretaker.saveMemento(perspective.createSnapshot());
-        
-        // Save snapshot 2
         perspective.setScale(2.0);
         caretaker.saveMemento(perspective.createSnapshot());
-        
-        // Save snapshot 3
         perspective.setScale(2.5);
         caretaker.saveMemento(perspective.createSnapshot());
-        
-        // Undo twice
+
+        // Act
         caretaker.popUndo();
         caretaker.popUndo();
-        assertEquals(1, caretaker.undoDepth());
-        assertEquals(2, caretaker.redoDepth());
-        
-        // Save a new snapshot (should clear redo)
         perspective.setScale(3.0);
         caretaker.saveMemento(perspective.createSnapshot());
-        
+
+        // Assert
         assertEquals(2, caretaker.undoDepth(), "Undo should have 2 after new save");
         assertEquals(0, caretaker.redoDepth(), "Redo should be cleared");
     }
 
     @Test
     public void testDepthTracking() {
-        assertEquals(0, caretaker.undoDepth(), "Initial undo depth should be 0");
-        assertEquals(0, caretaker.redoDepth(), "Initial redo depth should be 0");
-        
+        // Arrange
+
+        // Act
+        int initialUndoDepth = caretaker.undoDepth();
+        int initialRedoDepth = caretaker.redoDepth();
         perspective.setScale(1.0);
         caretaker.saveMemento(perspective.createSnapshot());
-        
-        assertEquals(1, caretaker.undoDepth(), "Undo depth should be 1");
-        assertEquals(0, caretaker.redoDepth(), "Redo depth should be 0");
+        int undoDepthAfterSave = caretaker.undoDepth();
+        int redoDepthAfterSave = caretaker.redoDepth();
+
+        // Assert
+        assertEquals(0, initialUndoDepth, "Initial undo depth should be 0");
+        assertEquals(0, initialRedoDepth, "Initial redo depth should be 0");
+        assertEquals(1, undoDepthAfterSave, "Undo depth should be 1");
+        assertEquals(0, redoDepthAfterSave, "Redo depth should be 0");
     }
 }

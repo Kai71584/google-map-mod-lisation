@@ -43,13 +43,20 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testAbstractControllerInitializationWithValidParameters() {
-        // Act & Assert
+        // Arrange
+
+        // Act
+        AbstractImageView view = undoRedoController.getView();
+
+        // Assert
         assertNotNull(undoRedoController, "Controller should be initialized");
-        assertEquals(mockImageView, undoRedoController.getView(), "View should be stored");
+        assertEquals(mockImageView, view, "View should be stored");
     }
 
     @Test
     void testAbstractControllerGetViewReturnsCorrectView() {
+        // Arrange
+
         // Act
         AbstractImageView view = undoRedoController.getView();
 
@@ -62,32 +69,33 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testHandleUndoWithEmptyHistory() {
+        // Arrange
+
         // Act
         undoRedoController.handleUndo();
 
         // Assert
-        // Should not throw and perspective should remain unchanged
-        assertEquals(1.0, perspective.getScale(), 0.001);
+        assertEquals(1.0, perspective.getScale(), 0.001, "Undo on empty history should keep scale");
     }
 
     @Test
     void testHandleRedoWithEmptyHistory() {
+        // Arrange
+
         // Act
         undoRedoController.handleRedo();
 
         // Assert
-        // Should not throw and perspective should remain unchanged
-        assertEquals(1.0, perspective.getScale(), 0.001);
+        assertEquals(1.0, perspective.getScale(), 0.001, "Redo on empty history should keep scale");
     }
 
     @Test
     void testHandleUndoAfterCommand() {
-        // Arrange - Exécuter une commande
+        // Arrange
         ZoomCommand zoomCommand = new ZoomCommand(perspective, 2.0);
         commandBus.execute(zoomCommand);
-        assertEquals(2.0, perspective.getScale(), 0.001, "Zoom should be applied");
 
-        // Act - Undo
+        // Act
         undoRedoController.handleUndo();
 
         // Assert
@@ -96,13 +104,12 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testHandleRedoAfterUndo() {
-        // Arrange - Exécuter une commande puis undo
+        // Arrange
         ZoomCommand zoomCommand = new ZoomCommand(perspective, 2.0);
         commandBus.execute(zoomCommand);
         undoRedoController.handleUndo();
-        assertEquals(1.0, perspective.getScale(), 0.001);
 
-        // Act - Redo
+        // Act
         undoRedoController.handleRedo();
 
         // Assert
@@ -111,7 +118,7 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testHandleUndoMultipleCommands() {
-        // Arrange - Exécuter plusieurs commandes
+        // Arrange
         commandBus.execute(new ZoomCommand(perspective, 2.0));
         double afterFirst = perspective.getScale();
         
@@ -121,7 +128,7 @@ public class AbstractAndUndoRedoControllersTest {
         commandBus.execute(new ZoomCommand(perspective, 1.3));  // Multiplies: 3.0 * 1.3 ≈ 3.9
         double afterThird = perspective.getScale();
 
-        // Act - Undo once
+        // Act
         undoRedoController.handleUndo();
         double afterFirstUndo = perspective.getScale();
 
@@ -132,7 +139,7 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testHandleRedoMultipleCommands() {
-        // Arrange - Exécuter plusieurs commandes, puis undo tout
+        // Arrange
         commandBus.execute(new ZoomCommand(perspective, 2.0));
         double scale1 = perspective.getScale();
         
@@ -142,13 +149,12 @@ public class AbstractAndUndoRedoControllersTest {
         commandBus.execute(new ZoomCommand(perspective, 1.2));
         double scale3 = perspective.getScale();
 
-        // Undo all
+        // Act
         undoRedoController.handleUndo();
         undoRedoController.handleUndo();
         undoRedoController.handleUndo();
         double afterAllUndo = perspective.getScale();
 
-        // Act - Redo once
         undoRedoController.handleRedo();
         double afterFirstRedo = perspective.getScale();
 
@@ -159,72 +165,73 @@ public class AbstractAndUndoRedoControllersTest {
 
     @Test
     void testUndoRedoAlternatingSequence() {
-        // Arrange - Exécuter une commande
+        // Arrange
         commandBus.execute(new ZoomCommand(perspective, 2.5));
 
-        // Act & Assert
+        // Act
         undoRedoController.handleUndo();
-        assertEquals(1.0, perspective.getScale(), 0.001);
-
+        double afterFirstUndo = perspective.getScale();
         undoRedoController.handleRedo();
-        assertEquals(2.5, perspective.getScale(), 0.001);
-
+        double afterFirstRedo = perspective.getScale();
         undoRedoController.handleUndo();
-        assertEquals(1.0, perspective.getScale(), 0.001);
-
+        double afterSecondUndo = perspective.getScale();
         undoRedoController.handleRedo();
-        assertEquals(2.5, perspective.getScale(), 0.001);
+        double finalScale = perspective.getScale();
+
+        // Assert
+        assertEquals(1.0, afterFirstUndo, 0.001);
+        assertEquals(2.5, afterFirstRedo, 0.001);
+        assertEquals(1.0, afterSecondUndo, 0.001);
+        assertEquals(2.5, finalScale, 0.001, "Final redo should reapply zoom");
     }
 
     @Test
     void testHandleUndoThenNewCommandClearsRedo() {
-        // Arrange - Exécuter commande, undo
+        // Arrange
         commandBus.execute(new ZoomCommand(perspective, 2.0));
         undoRedoController.handleUndo();
-        assertEquals(1.0, perspective.getScale(), 0.001);
 
-        // Act - Exécuter une nouvelle commande
+        // Act
         commandBus.execute(new ZoomCommand(perspective, 3.0));
-
-        // Assert - Redo ne devrait rien faire (l'historique redo est vidé)
         undoRedoController.handleRedo();
+
+        // Assert
         assertEquals(3.0, perspective.getScale(), 0.001, "Redo should not change state after new command");
     }
 
     @Test
     void testUndoRedoWithLargeCommandSequence() {
-        // Arrange - Exécuter 5 commandes
+        // Arrange
         for (int i = 1; i <= 5; i++) {
             commandBus.execute(new ZoomCommand(perspective, 1.1));
         }
         double scaleAfterCommands = perspective.getScale();
 
-        // Act - Undo 5 times
+        // Act
         for (int i = 0; i < 5; i++) {
             undoRedoController.handleUndo();
         }
         double scaleAfterAllUndo = perspective.getScale();
 
-        // Assert
-        assertEquals(1.0, scaleAfterAllUndo, 0.001, "Should be back to 1.0");
-        assertNotEquals(scaleAfterCommands, scaleAfterAllUndo);
-
-        // Act - Redo all
         for (int i = 0; i < 5; i++) {
             undoRedoController.handleRedo();
         }
         double scaleAfterAllRedo = perspective.getScale();
 
         // Assert
+        assertEquals(1.0, scaleAfterAllUndo, 0.001, "Should be back to 1.0");
+        assertNotEquals(scaleAfterCommands, scaleAfterAllUndo);
         assertEquals(scaleAfterCommands, scaleAfterAllRedo, 0.001);
     }
 
     @Test
     void testAbstractControllerFieldAccessibility() {
         // Arrange
+
+        // Act
         AbstractImageView retrievedView = undoRedoController.getView();
 
-        // Act & Assert
+        // Assert
         assertSame(mockImageView, retrievedView, "Should return the same view instance");
     }
 
